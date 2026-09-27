@@ -124,8 +124,54 @@ public class SimulationService {
                         }
                     }
                 }
+            } catch (java.io.FileNotFoundException fnfe) {
+                // CLOUD FALLBACK: Automatically generate infinite high-speed fake transactions
+                System.out.println("Running in Cloud Mode: Generating dynamic synthetic transactions...");
+                String[] types = {"PAYMENT", "TRANSFER", "CASH_OUT", "DEBIT", "CASH_IN"};
+                java.util.Random rnd = new java.util.Random();
+                while (isRunning.get()) {
+                    long startTime = System.nanoTime();
+                    
+                    Transaction tx = new Transaction();
+                    tx.setId(java.util.UUID.randomUUID());
+                    tx.setStep(1);
+                    tx.setType(types[rnd.nextInt(types.length)]);
+                    // 95% chance of normal small transaction, 5% chance of huge spiked fraud transaction
+                    double amt = rnd.nextDouble() < 0.95 ? rnd.nextDouble() * 5000 : 50000 + rnd.nextDouble() * 500000;
+                    tx.setAmount(new java.math.BigDecimal(amt));
+                    tx.setNameOrig("C" + (100000 + rnd.nextInt(900000)));
+                    tx.setOldBalanceOrig(new java.math.BigDecimal(0));
+                    tx.setNewBalanceOrig(new java.math.BigDecimal(0));
+                    tx.setNameDest("C" + (100000 + rnd.nextInt(900000)));
+                    tx.setOldBalanceDest(new java.math.BigDecimal(0));
+                    tx.setNewBalanceDest(new java.math.BigDecimal(0));
+                    tx.setEventTime(java.time.LocalDateTime.now());
+                    
+                    RiskAssessment assessment = fraudDetectionEngine.assessTransaction(tx);
+                    if ("HIGH".equals(assessment.getCategory())) {
+                        assessment.setTriggeredRules(assessment.getTriggeredRules() + ",ACTION:BLOCKED_HIGH_PRIORITY");
+                    } else if ("MEDIUM".equals(assessment.getCategory())) {
+                        assessment.setTriggeredRules(assessment.getTriggeredRules() + ",ACTION:MANUAL_REVIEW");
+                    } else {
+                        assessment.setTriggeredRules(assessment.getTriggeredRules() + ",ACTION:AUTO_APPROVED");
+                    }
+                    broadcast(assessment);
+
+                    if (delayNanos > 0) {
+                        long elapsedNanos = System.nanoTime() - startTime;
+                        long sleepNanos = delayNanos - elapsedNanos;
+                        if (sleepNanos > 0) {
+                            try {
+                                Thread.sleep(sleepNanos / 1_000_000, (int) (sleepNanos % 1_000_000));
+                            } catch (InterruptedException ie) {
+                                Thread.currentThread().interrupt();
+                                break;
+                            }
+                        }
+                    }
+                }
             } catch (Exception e) {
-                System.err.println("Error reading CSV: " + e.getMessage());
+                System.err.println("Error running simulation: " + e.getMessage());
             } finally {
                 isRunning.set(false);
             }

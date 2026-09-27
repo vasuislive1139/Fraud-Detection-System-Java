@@ -2,9 +2,9 @@ FROM eclipse-temurin:17-jdk-jammy AS build
 WORKDIR /workspace/app
 
 # Copy maven wrapper and pom file
-COPY mvnw .
-COPY .mvn .mvn
-COPY pom.xml .
+COPY backend/mvnw .
+COPY backend/.mvn .mvn
+COPY backend/pom.xml .
 
 # Make mvnw executable
 RUN chmod +x ./mvnw
@@ -13,7 +13,7 @@ RUN chmod +x ./mvnw
 RUN ./mvnw dependency:go-offline
 
 # Copy source code and build
-COPY src src
+COPY backend/src src
 RUN ./mvnw clean package -DskipTests
 
 # Stage 2: Run
