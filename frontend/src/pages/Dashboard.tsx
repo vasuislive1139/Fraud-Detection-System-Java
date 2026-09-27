@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react';
-import { ResponsiveContainer, AreaChart, Area, XAxis, Tooltip } from 'recharts';
+import { ResponsiveContainer, AreaChart, Area, Tooltip } from 'recharts';
 import { Activity, ShieldAlert, Zap, Globe } from 'lucide-react';
 import { motion } from 'framer-motion';
-import DraggableWidgetGrid, { WidgetItem, WidgetSize } from '../components/ui/draggable-widget-grid';
+import DraggableWidgetGrid, { type WidgetItem } from '../components/ui/draggable-widget-grid';
 
 // --- WIDGET DEFINITIONS ---
 type Kind = 'velocity' | 'processed' | 'critical' | 'anomalies' | 'radar';

@@ -1,5 +1,5 @@
 import { useEffect, useState, useRef } from 'react';
-import { Activity, ShieldCheck, Search, ShieldAlert, Ban } from 'lucide-react';
+import { Activity, ShieldCheck, Search, Ban } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 interface TxEvent {
