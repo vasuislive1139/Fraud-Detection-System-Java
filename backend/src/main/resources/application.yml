@@ -1,0 +1,32 @@
+spring:
+  application:
+    name: fraudshield-nexus
+  datasource:
+    url: jdbc:postgresql://localhost:5432/fraudshield_db
+    username: fraudshield_user
+    password: fraudshield_password
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        format_sql: true
+    show-sql: true
+  flyway:
+    enabled: true
+    baseline-on-migrate: true
+    locations: classpath:db/migration
+
+server:
+  port: 8080
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+  endpoint:
+    health:
+      show-details: always
